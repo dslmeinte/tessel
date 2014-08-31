@@ -4,6 +4,8 @@ var gpio = tessel.port['GPIO']; // select the GPIO port
 var xPin = gpio.analog[4];		// A5 ~ pin 6
 var yPin = gpio.analog[3];		// A4 ~ pin 8
 var selPin = gpio.digital[3];	// G4 ~ pin 20
+selPin.pull('none');			// initialise pull-up/down state of pin (in case left set to something else)
+	// TODO  find out whether we can use 'pullup' to do away with pull-up resistor
 
 /*
  * Connect Tessel <-> Analog Thumb Joystick Breakout Board:
