@@ -3,6 +3,7 @@ module.exports = function (port) {
 	"use strict";
 
 	// ported from: https://github.com/adafruit/Adafruit_MPL115A2/blob/master/Adafruit_MPL115A2.cpp
+	// data sheet: http://www.adafruit.com/datasheets/MPL115A2.pdf
 
 	var i2c_address = 0x60;
 
@@ -43,10 +44,10 @@ module.exports = function (port) {
 				var idx = 0;
 				var rawPressure = (256*rx[idx++] + rx[idx++])/64;
 				var rawTemperature = (256*rx[idx++] + rx[idx++])/64;
-				var pressureComp = a0 + (b1 + c12*rawTemperature)*rawPressure + b2*rawTemperature;
+				var pressureCompensated = a0 + (b1 + c12*rawTemperature)*rawPressure + b2*rawTemperature;
 				callback({
-					'pressure':		((65.0/1023.0)*pressureComp) + 50.0,	// KPa
-					'temperature':	(rawTemperature - 498)/(-5.35) + 25.0	// C
+					'pressure':		((115-50/1023)*pressureCompensated) + 50,	// KPa
+					'temperature':	(rawTemperature - 498)/(-5.35) + 25			// C
 				});
 			});
 		}, 3);
