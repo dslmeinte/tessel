@@ -28,7 +28,7 @@ module.exports = function (port) {
 
 	var i2cBus = new port.I2C(i2c_address);
 
-	i2cBus.transfer(new Buffer[registers.a0_coeff_msb], 8, function (err, rx) {
+	i2cBus.transfer(new Buffer([registers.a0_coeff_msb]), 8, function (err, rx) {
 		var idx = 0;
 		a0 = (256*rx[idx++] + rx[idx++])/8;
 		b1 = (256*rx[idx++] + rx[idx++])/8192;
