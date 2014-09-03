@@ -31,10 +31,11 @@ module.exports = function (port) {
 
 	i2cBus.transfer(new Buffer([registers.a0_coeff_msb]), 8, function (err, rx) {
 		var idx = 0;
-		a0 = (256*rx[idx++] + rx[idx++])/8;
-		b1 = (256*rx[idx++] + rx[idx++])/8192;
-		b2 = (256*rx[idx++] + rx[idx++])/16384;
-		c12 = (256*rx[idx++] + rx[idx++])/(2*4194304);
+		a0  = decodeTwosComplement(rx[idx++], rx[idx++])/8;
+		b1  = decodeTwosComplement(rx[idx++], rx[idx++])/8192;
+		b2  = decodeTwosComplement(rx[idx++], rx[idx++])/16384;
+		c12 = ((256*rx[idx++] + rx[idx++])>>2)/4194304;
+		// TODO  also decode as 2's complement
 	});
 
 	function measure (callback) {
@@ -46,11 +47,17 @@ module.exports = function (port) {
 				var rawTemperature = (256*rx[idx++] + rx[idx++])/64;
 				var pressureCompensated = a0 + (b1 + c12*rawTemperature)*rawPressure + b2*rawTemperature;
 				callback({
-					'pressure':		((115-50/1023)*pressureCompensated) + 50,	// KPa
+					'pressure':		(((115-50)/1023)*pressureCompensated) + 50,	// KPa
 					'temperature':	(rawTemperature - 498)/(-5.35) + 25			// C
 				});
 			});
 		}, 3);
+	}
+
+	function decodeTwosComplement (msb, lsb) {
+		var sign = msb>>>7;
+		var newmsb = msb%128;
+		return (256*newmsb + lsb) -sign*(1<<15);
 	}
 
 	return {
